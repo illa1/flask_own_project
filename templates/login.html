@@ -8,19 +8,33 @@
             <!-- Content -->
 
             <article>
+{{ message }}
 
+<!--                <form name="login" method="post" action="/login">-->
+<!--                    <h2>Login</h2>-->
+<!--                    <p>{{ message }}</p>-->
 
-                <form name="login" method="post" action="/login">
-                    <h2>Login</h2>
-                    <p>{{ message }}</p>
+<!--                    <input name="email" type="text" required placeholder="Your email">-->
+<!--                    <br>-->
+<!--                    <input name="password" type="password" required placeholder="Your password">-->
+<!--                    <br>-->
 
-                    <input name="email" type="text" required placeholder="Your email">
-                    <br>
-                    <input name="password" type="password" required placeholder="Your password">
-                    <br>
+<!--                    <button name="submit" type="submit">Login</button>-->
+<!--                </form>-->
+                <form method="post" action="{{url_for('login')}}" id="contactform" class="contact">
+                        <div class="form-group has-feedback">
+                            <label for="email">Введіть Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="" required>
+                            <i class="fa fa-user form-control-feedback"></i>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <label for="password">Введіть пароль</label>
+                            <input type="password" class="form-control" name="password" placeholder="" required>
+                            <i class="fa fa-key form-control-feedback"></i>
+                        </div>
 
-                    <button name="submit" type="submit">Login</button>
-                </form>
+                        <input type="submit" value="Вхід" id="submit" class="submit btn btn-default">
+                    </form>
 
                 <span class="image featured"><img src="images/banner.jpg" alt=""/></span>
 

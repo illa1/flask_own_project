@@ -1,23 +1,25 @@
 from flask import Flask, request, session, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
-
+from werkzeug.security import check_password_hash
 
 import os
-from sqlalchemy.testing.suite.test_reflection import users
 
+SESSION_USER_ID = 'user_id'
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'flask.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'kiuVkyaxU14Gb1b5REoq2D0udY0b7rxvtnd_0ByyE74'
 db = SQLAlchemy(app)
 
+
 #========== MODELS ====================================
-app.secret_key = 'NDhZjx_aafafTMCafajfxRBkqh-0uYFFur0afafsmA8DVaw'
+
 
 
 class User(db.Model):
+    __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
@@ -27,9 +29,12 @@ class User(db.Model):
     def __repr__(self):
         return f'<User: {self.username}>'
 
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
-with app.app_context():
-    db.create_all()
+
+# with app.app_context():
+#     db.create_all()
 
 #========== ROUTS =====================================
 
@@ -56,8 +61,8 @@ def two_sidebar():
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
-    if not session.get('username'):
-        return redirect('/login')
+    # if not session.get('username'):
+    #     return redirect('/login')
 
     if request.method == 'POST':
         username = request.form['username']
@@ -73,34 +78,31 @@ def registration():
         return render_template('registration.html')
 
 
-@app.route('/login', methods=['GET'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    message = 'Enter you Login password'
+    message = ''
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            message = 'Неправильний Email!'
+        else:
+            if user.check_password(password):
+                session[SESSION_USER_ID] = user.id
+                return redirect('/')
+
+            message = 'Неправильний пароль'
+
     return render_template('login.html', message=message)
 
 
-@app.route('/login', methods=['POST'])
-def login_user():
-    email = request.form['email']
-    password = request.form['password']
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        message = 'Enter correct email'
-        return render_template('login.html', message=message)
-    else:
-        if user.password != password:
-            message = 'Enter correct password'
-            return render_template('login.html', message=message)
-        else:
-            session['username'] = user.username
-            return redirect('/')
-
-
-@app.route('/logout', methods=['GET'])
+@app.route('/logout')
 def logout():
-    session.clear()
+    session.pop(SESSION_USER_ID, None)
     return redirect('/')
 
 
