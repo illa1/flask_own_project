@@ -1,6 +1,7 @@
 from flask import Flask, request, session, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
+from datetime import datetime
 
 import os
 
@@ -33,6 +34,15 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
 
+class Posts(db.Model):
+    __tablename__ = 'Posts'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    image = db.Column(db.String(255), nullable=False)
+    text = db.Column(db.Text(), nullable=False)
+    created_on = db.Column(db.Date(), default=datetime.utcnow())
+    deleted = db.Column(db.Integer, nullable=False, default=False)
+
 # with app.app_context():
 #     db.create_all()
 
@@ -44,9 +54,11 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/left-sidebar')
-def left_sidebar():
-    return render_template('left-sidebar.html')
+@app.route('/article')
+def article():
+    articles = Posts.query.all()
+
+    return render_template('article.html', articles=articles)
 
 
 @app.route('/right-sidebar')
